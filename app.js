@@ -91,6 +91,7 @@ function worryCardHTML(w, { ready = false } = {}) {
          data-id="${w.id}" data-dread="${w.dread}"
          ${ready ? `role="button" tabindex="0" aria-label="Check in on this worry"` : ""}>
       <p class="worry-text">${esc(w.text)}</p>
+      ${w.notes ? `<p class="worry-note">${esc(w.notes)}</p>` : ""}
       <div class="worry-meta">${meta.join("")}</div>
       ${ready ? `<span class="ready-hint">Tap to check in</span>` : ""}
       <button class="worry-delete" data-delete="${w.id}" aria-label="Delete this worry">&times;</button>
@@ -406,8 +407,9 @@ function openCheckin(worry) {
   checkinSeverity = null;
   $("#checkin-worry-text").textContent = worry.text;
   const parked = formatDate(worry.created.slice(0, 10));
-  $("#checkin-worry-meta").textContent =
-    `Parked ${parked}. Dread then: ${worry.dread} of 5, ${DREAD_WORDS[worry.dread]}.`;
+  let meta = `Parked ${parked}. Dread then: ${worry.dread} of 5, ${DREAD_WORDS[worry.dread]}.`;
+  if (worry.notes) meta += ` Your note: "${worry.notes}"`;
+  $("#checkin-worry-meta").textContent = meta;
   document.querySelectorAll(".outcome-btn").forEach((b) => b.classList.remove("is-active"));
   document.querySelectorAll("#severity-row .chip").forEach((c) => c.classList.remove("is-active"));
   $("#severity-block").hidden = true;

@@ -266,6 +266,12 @@ body {
 .worry-card[data-dread="4"] .worry-text { font-size: 1.08rem; }
 .worry-card[data-dread="5"] .worry-text { font-size: 1.14rem; }
 
+.worry-note {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  padding-right: 2rem;
+}
+
 .worry-meta {
   font-size: 0.8rem;
   color: var(--ink-soft);
@@ -677,14 +683,13 @@ input[type="range"] {
 
 .park-btn-floating {
   position: fixed;
-  bottom: 1.1rem;
-  left: 50%;
-  transform: translateX(-50%);
+  bottom: 1.25rem;
+  right: 1.25rem;
   z-index: 30;
   box-shadow: var(--shadow-big);
   padding: 0.7rem 1.6rem;
 }
-.park-btn-floating:active { transform: translateX(-50%) scale(0.97); }
+.park-btn-floating:active { transform: scale(0.97); }
 
 /* ---- responsive ------------------------------------------------------------- */
 
