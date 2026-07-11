@@ -13,7 +13,7 @@ import {
 } from "./storage.js";
 
 let data = load();
-let currentView = "shelf";
+let currentView = "today";
 let enteringId = null; // worry that should animate onto the shelf
 
 const $ = (sel) => document.querySelector(sel);
@@ -49,8 +49,9 @@ function switchView(view) {
     if (active) tab.setAttribute("aria-current", "page");
     else tab.removeAttribute("aria-current");
   });
-  $("#view-shelf").hidden = view !== "shelf";
+  $("#view-today").hidden = view !== "today";
   $("#view-pattern").hidden = view !== "pattern";
+  $("#view-lot").hidden = view !== "lot";
   $("#view-history").hidden = view !== "history";
   render();
 }
@@ -62,10 +63,20 @@ document.querySelectorAll(".tab").forEach((tab) => {
 // ---- rendering ------------------------------------------------------------------
 
 function render() {
-  if (currentView === "shelf") renderShelf();
+  if (currentView === "today") renderToday();
   if (currentView === "pattern") renderPattern();
+  if (currentView === "lot") renderLot();
   if (currentView === "history") renderHistory();
   renderBackupStatus();
+  renderTabBadge();
+}
+
+// The Today tab badge shows how many check-ins are due.
+function renderTabBadge() {
+  const badge = $("#today-badge");
+  const { ready } = groupWorries(data.worries);
+  badge.textContent = ready.length;
+  badge.hidden = ready.length === 0;
 }
 
 function worryCardHTML(w, { ready = false } = {}) {
@@ -86,9 +97,12 @@ function worryCardHTML(w, { ready = false } = {}) {
     </div>`;
 }
 
-function renderShelf() {
-  const el = $("#shelf-content");
-  const { ready, waiting, resolved } = groupWorries(data.worries);
+// Today shows only what needs the user now: due check-ins, or permission
+// to not worry. Everything else waits in the parking lot.
+function renderToday() {
+  const el = $("#today-content");
+  const today = todayStr();
+  const { ready, waiting, resolved } = groupWorries(data.worries, today);
 
   if (data.worries.length === 0) {
     el.innerHTML = `
@@ -107,6 +121,39 @@ function renderShelf() {
     return;
   }
 
+  if (ready.length > 0) {
+    el.innerHTML = `
+      <h2 class="section-h">Ready to check</h2>
+      <div class="worry-list">${ready.map((w) => worryCardHTML(w, { ready: true })).join("")}</div>`;
+    enteringId = null;
+    return;
+  }
+
+  let sub;
+  if (waiting.length > 0) {
+    const next = waiting[0].checkIn;
+    sub = `${waiting.length} worr${waiting.length === 1 ? "y is" : "ies are"} parked and waiting. The next check-in is ${formatDate(next, today)}. Until then, they can wait without you.`;
+  } else {
+    sub = `Nothing is parked right now. Your ${resolved.length === 1 ? "checked worry rests" : "checked worries rest"} in History.`;
+  }
+  el.innerHTML = `
+    <div class="today-clear card">
+      <p class="today-clear-title serif">Nothing to check today.</p>
+      <p class="today-clear-sub">${sub}</p>
+    </div>`;
+  enteringId = null;
+}
+
+function renderLot() {
+  const el = $("#lot-content");
+  const { ready, waiting } = groupWorries(data.worries);
+
+  if (ready.length === 0 && waiting.length === 0) {
+    el.innerHTML = `<p class="quiet-note">The parking lot is empty. Park a worry and it will wait here, not in your head.</p>`;
+    enteringId = null;
+    return;
+  }
+
   let html = "";
   if (ready.length > 0) {
     html += `<h2 class="section-h">Ready to check</h2>
@@ -115,9 +162,6 @@ function renderShelf() {
   if (waiting.length > 0) {
     html += `<h2 class="section-h">Waiting</h2>
       <div class="worry-list">${waiting.map((w) => worryCardHTML(w)).join("")}</div>`;
-  }
-  if (ready.length === 0 && waiting.length === 0) {
-    html += `<p class="quiet-note">Nothing on the shelf right now. ${resolved.length} worr${resolved.length === 1 ? "y is" : "ies are"} checked and resting in History.</p>`;
   }
   el.innerHTML = html;
   enteringId = null;
@@ -132,12 +176,12 @@ function renderPattern() {
   let headlineHTML;
   if (data.worries.length === 0) {
     headlineHTML = `
-      <p class="headline-stat">Your pattern starts with the first worry you park.</p>
+      <p class="headline-stat quiet">Your pattern starts with the first worry you park.</p>
       <p class="headline-sub">Park worries, check in when their dates arrive, and this page will show what really happened.</p>`;
   } else if (h.state === "forming") {
     const pct = Math.round((h.done / h.needed) * 100);
     headlineHTML = `
-      <p class="headline-stat">${h.done} of ${h.needed} check-ins done. Your pattern is forming.</p>
+      <p class="headline-stat quiet">${h.done} of ${h.needed} check-ins done. Your pattern is forming.</p>
       <div class="forming-progress">
         <div class="progress-track"><div class="progress-fill" style="width: ${pct}%"></div></div>
       </div>
@@ -342,11 +386,10 @@ captureForm.addEventListener("submit", (e) => {
   persist();
   enteringId = worry.id;
   closeBackdrop(captureBackdrop);
-  switchView("shelf");
+  switchView("today");
   toast(`Parked. Check-in on ${formatDate(checkIn)}.`);
 });
 
-$("#park-btn-header").addEventListener("click", openCapture);
 $("#park-btn-floating").addEventListener("click", openCapture);
 $("#capture-close").addEventListener("click", () => closeBackdrop(captureBackdrop));
 

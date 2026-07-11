@@ -12,26 +12,38 @@
 
   <header class="app-header">
     <div class="app-header-inner">
-      <h1 class="app-title">Worry Ledger</h1>
+      <div class="header-row">
+        <h1 class="app-title">Worry<span class="app-title-accent">Ledger</span></h1>
+        <div class="backup-cluster">
+          <span class="backup-status" id="backup-status">Last backup: never</span>
+          <button class="btn" id="export-btn">Export</button>
+          <button class="btn ghost" id="import-btn">Import</button>
+        </div>
+      </div>
       <nav class="tabs" aria-label="Views">
-        <button class="tab is-active" data-view="shelf" aria-current="page">Shelf</button>
+        <button class="tab is-active" data-view="today" aria-current="page">Today<span class="tab-badge" id="today-badge" hidden></span></button>
         <button class="tab" data-view="pattern">Pattern</button>
+        <button class="tab" data-view="lot">Parking lot</button>
         <button class="tab" data-view="history">History</button>
       </nav>
-      <button class="btn primary park-btn-header" id="park-btn-header">Park a worry</button>
     </div>
   </header>
 
   <main class="app-main">
 
-    <!-- Shelf -->
-    <section id="view-shelf" class="view">
-      <div id="shelf-content"></div>
+    <!-- Today -->
+    <section id="view-today" class="view">
+      <div id="today-content"></div>
     </section>
 
     <!-- Pattern -->
     <section id="view-pattern" class="view" hidden>
       <div id="pattern-content"></div>
+    </section>
+
+    <!-- Parking lot -->
+    <section id="view-lot" class="view" hidden>
+      <div id="lot-content"></div>
     </section>
 
     <!-- History -->
@@ -42,19 +54,12 @@
   </main>
 
   <footer class="app-footer">
-    <div class="backup-bar card">
-      <p class="backup-status" id="backup-status">Last backup: never</p>
-      <div class="backup-actions">
-        <button class="btn" id="export-btn">Export backup</button>
-        <button class="btn ghost" id="import-btn">Import</button>
-      </div>
-      <p class="backup-note">The export is a readable text file with your worries in it. Keep it somewhere private.</p>
-    </div>
     <p class="footer-line">Everything stays in your browser. The network tab will confirm it.</p>
+    <p class="footer-line">Backups are readable text files with your worries in them. Keep them somewhere private.</p>
     <p class="footer-line">This is a journal, not therapy. If worry feels overwhelming, support from a professional can make a real difference.</p>
   </footer>
 
-  <!-- Always-reachable capture button on small screens -->
+  <!-- Always-reachable capture button -->
   <button class="btn primary park-btn-floating" id="park-btn-floating">Park a worry</button>
 
   <!-- Capture sheet (bottom sheet on mobile, side panel on desktop) -->
