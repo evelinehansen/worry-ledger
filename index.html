@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A quiet place to park worries, check in with reality, and see how many ever came true. Everything stays in your browser.">
+  <title>Worry Ledger</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%23647F5E'/%3E%3Crect x='24' y='30' width='52' height='8' rx='4' fill='%23FAFAF7'/%3E%3Crect x='24' y='48' width='52' height='8' rx='4' fill='%23FAFAF7' opacity='0.7'/%3E%3Crect x='24' y='66' width='34' height='8' rx='4' fill='%23FAFAF7' opacity='0.45'/%3E%3C/svg%3E">
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="app-header-inner">
+      <h1 class="app-title">Worry Ledger</h1>
+      <nav class="tabs" aria-label="Views">
+        <button class="tab is-active" data-view="shelf" aria-current="page">Shelf</button>
+        <button class="tab" data-view="pattern">Pattern</button>
+        <button class="tab" data-view="history">History</button>
+      </nav>
+      <button class="btn primary park-btn-header" id="park-btn-header">Park a worry</button>
+    </div>
+  </header>
+
+  <main class="app-main">
+
+    <!-- Shelf -->
+    <section id="view-shelf" class="view">
+      <div id="shelf-content"></div>
+    </section>
+
+    <!-- Pattern -->
+    <section id="view-pattern" class="view" hidden>
+      <div id="pattern-content"></div>
+    </section>
+
+    <!-- History -->
+    <section id="view-history" class="view" hidden>
+      <div id="history-content"></div>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <div class="backup-bar card">
+      <p class="backup-status" id="backup-status">Last backup: never</p>
+      <div class="backup-actions">
+        <button class="btn" id="export-btn">Export backup</button>
+        <button class="btn ghost" id="import-btn">Import</button>
+      </div>
+      <p class="backup-note">The export is a readable text file with your worries in it. Keep it somewhere private.</p>
+    </div>
+    <p class="footer-line">Everything stays in your browser. The network tab will confirm it.</p>
+    <p class="footer-line">This is a journal, not therapy. If worry feels overwhelming, support from a professional can make a real difference.</p>
+  </footer>
+
+  <!-- Always-reachable capture button on small screens -->
+  <button class="btn primary park-btn-floating" id="park-btn-floating">Park a worry</button>
+
+  <!-- Capture sheet (bottom sheet on mobile, side panel on desktop) -->
+  <div class="backdrop" id="capture-backdrop" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="capture-title">
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="capture-title">Park a worry</h2>
+        <button class="icon-btn" id="capture-close" aria-label="Close">&times;</button>
+      </div>
+      <form id="capture-form" novalidate>
+        <label class="field-label" for="worry-text">What is the worry?</label>
+        <textarea id="worry-text" rows="2" placeholder="What if..." required></textarea>
+
+        <label class="field-label" for="dread-input">How heavy does it feel right now?</label>
+        <div class="dread-row">
+          <input type="range" id="dread-input" min="1" max="5" step="1" value="3"
+                 aria-describedby="dread-label">
+          <span class="dread-label" id="dread-label">3 of 5, unsettling</span>
+        </div>
+
+        <span class="field-label" id="checkin-legend">When will you know?</span>
+        <div class="preset-row" role="group" aria-labelledby="checkin-legend">
+          <button type="button" class="chip" data-preset="tomorrow">Tomorrow</button>
+          <button type="button" class="chip is-active" data-preset="week" aria-pressed="true">Next week</button>
+          <button type="button" class="chip" data-preset="month">In a month</button>
+          <button type="button" class="chip" data-preset="custom">Pick a date</button>
+        </div>
+        <input type="date" id="checkin-date" class="date-input" hidden aria-label="Check-in date">
+        <p class="checkin-summary" id="checkin-summary"></p>
+
+        <button type="button" class="link-btn" id="details-toggle" aria-expanded="false">
+          Add a category or note
+        </button>
+        <div id="details-fields" hidden>
+          <label class="field-label" for="category-input">Category (optional)</label>
+          <input type="text" id="category-input" list="category-list" placeholder="work, health, money...">
+          <datalist id="category-list"></datalist>
+          <label class="field-label" for="notes-input">Notes (optional)</label>
+          <textarea id="notes-input" rows="2" placeholder="Anything worth remembering about right now"></textarea>
+        </div>
+
+        <button type="submit" class="btn primary btn-block" id="park-submit">Park it</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Check-in dialog -->
+  <div class="backdrop" id="checkin-backdrop" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="checkin-title">
+      <div class="sheet-head">
+        <h2 class="sheet-title" id="checkin-title">Check in</h2>
+        <button class="icon-btn" id="checkin-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="checkin-body">
+        <p class="checkin-worry serif" id="checkin-worry-text"></p>
+        <p class="checkin-meta" id="checkin-worry-meta"></p>
+
+        <span class="field-label">What actually happened?</span>
+        <div class="outcome-list" id="outcome-list">
+          <button type="button" class="outcome-btn" data-outcome="didntHappen">
+            <span class="outcome-main">Didn't happen</span>
+            <span class="outcome-sub">the feared thing did not occur</span>
+          </button>
+          <button type="button" class="outcome-btn" data-outcome="partly">
+            <span class="outcome-main">Partly</span>
+            <span class="outcome-sub">something happened, but smaller or different than feared</span>
+          </button>
+          <button type="button" class="outcome-btn" data-outcome="happened">
+            <span class="outcome-main">Happened</span>
+            <span class="outcome-sub">roughly as feared</span>
+          </button>
+          <button type="button" class="outcome-btn" data-outcome="obsolete">
+            <span class="outcome-main">No longer matters</span>
+            <span class="outcome-sub">left out of your statistics</span>
+          </button>
+        </div>
+
+        <div id="severity-block" hidden>
+          <span class="field-label" id="severity-legend">How bad was it really? (0 is nothing at all, 5 is as bad as feared)</span>
+          <div class="severity-row" role="group" aria-labelledby="severity-legend" id="severity-row">
+            <button type="button" class="chip" data-severity="0">0</button>
+            <button type="button" class="chip" data-severity="1">1</button>
+            <button type="button" class="chip" data-severity="2">2</button>
+            <button type="button" class="chip" data-severity="3">3</button>
+            <button type="button" class="chip" data-severity="4">4</button>
+            <button type="button" class="chip" data-severity="5">5</button>
+          </div>
+          <p class="severity-label" id="severity-label"></p>
+        </div>
+
+        <div id="reflection-block" hidden>
+          <label class="field-label" for="reflection-input">One line about it, if you want</label>
+          <input type="text" id="reflection-input" placeholder="What actually happened, in your words">
+          <button type="button" class="btn primary btn-block" id="checkin-save">Save check-in</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Import choice dialog -->
+  <div class="backdrop backdrop-center" id="import-backdrop" hidden>
+    <div class="dialog card" role="dialog" aria-modal="true" aria-labelledby="import-title">
+      <h2 class="sheet-title" id="import-title">Import backup</h2>
+      <p class="dialog-text" id="import-summary"></p>
+      <div class="dialog-actions">
+        <button class="btn primary" id="import-merge">Merge with current</button>
+        <button class="btn danger" id="import-replace">Replace everything</button>
+        <button class="btn ghost" id="import-cancel">Cancel</button>
+      </div>
+      <p class="dialog-note">Merge keeps everything from both. Replace discards what is in the browser now.</p>
+    </div>
+  </div>
+
+  <input type="file" id="import-file" accept=".json,application/json" hidden>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
