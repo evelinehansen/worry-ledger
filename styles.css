@@ -225,6 +225,16 @@ body {
 }
 .section-h:first-child { margin-top: 0; }
 
+/* ---- category filter row -------------------------------------------------- */
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 1.25rem;
+}
+.filter-row + .section-h { margin-top: 0; }
+
 /* ---- worry cards ------------------------------------------------------- */
 
 .worry-list { display: flex; flex-direction: column; gap: 0.7rem; }
@@ -402,7 +412,7 @@ body {
 .headline-stat {
   font-family: var(--serif);
   font-weight: 600;
-  font-size: clamp(1.5rem, 4.5vw, 2.1rem);
+  font-size: clamp(1.5rem, 4vw, 1.8rem);
   line-height: 1.3;
 }
 .headline-stat strong { color: var(--sage-deep); font-weight: 600; }

@@ -15,6 +15,7 @@ import {
 let data = load();
 let currentView = "today";
 let enteringId = null; // worry that should animate onto the shelf
+let categoryFilter = null; // null means all categories; shared across tabs
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -78,6 +79,34 @@ function renderTabBadge() {
   badge.textContent = ready.length;
   badge.hidden = ready.length === 0;
 }
+
+// Category filter row, shown on every tab except Today.
+function filterRowHTML() {
+  const cats = categoriesOf(data.worries);
+  if (cats.length === 0) return "";
+  if (categoryFilter && !cats.includes(categoryFilter)) categoryFilter = null;
+  const chip = (value, label) => {
+    const active = value === categoryFilter;
+    return `<button type="button" class="chip filter-chip ${active ? "is-active" : ""}"
+      data-filter="${esc(value ?? "")}" aria-pressed="${active}">${esc(label)}</button>`;
+  };
+  return `
+    <div class="filter-row" role="group" aria-label="Filter by category">
+      ${chip(null, "All categories")}${cats.map((c) => chip(c, c)).join("")}
+    </div>`;
+}
+
+function filteredWorries() {
+  if (!categoryFilter) return data.worries;
+  return data.worries.filter((w) => w.category === categoryFilter);
+}
+
+document.addEventListener("click", (e) => {
+  const chip = e.target.closest(".filter-chip");
+  if (!chip) return;
+  categoryFilter = chip.dataset.filter || null;
+  render();
+});
 
 function worryCardHTML(w, { ready = false } = {}) {
   const today = todayStr();
@@ -147,15 +176,18 @@ function renderToday() {
 
 function renderLot() {
   const el = $("#lot-content");
-  const { ready, waiting } = groupWorries(data.worries);
+  const { ready, waiting } = groupWorries(filteredWorries());
 
   if (ready.length === 0 && waiting.length === 0) {
-    el.innerHTML = `<p class="quiet-note">The parking lot is empty. Park a worry and it will wait here, not in your head.</p>`;
+    const note = categoryFilter
+      ? `Nothing is parked under &ldquo;${esc(categoryFilter)}&rdquo; right now.`
+      : "The parking lot is empty. Park a worry and it will wait here, not in your head.";
+    el.innerHTML = `${filterRowHTML()}<p class="quiet-note">${note}</p>`;
     enteringId = null;
     return;
   }
 
-  let html = "";
+  let html = filterRowHTML();
   if (ready.length > 0) {
     html += `<h2 class="section-h">Ready to check</h2>
       <div class="worry-list">${ready.map((w) => worryCardHTML(w, { ready: true })).join("")}</div>`;
@@ -171,8 +203,9 @@ function renderLot() {
 function renderPattern() {
   const el = $("#pattern-content");
   const today = todayStr();
-  const { ready, waiting, resolved } = groupWorries(data.worries, today);
-  const h = headline(data.worries);
+  const worries = filteredWorries();
+  const { ready, waiting, resolved } = groupWorries(worries, today);
+  const h = headline(worries);
 
   let headlineHTML;
   if (data.worries.length === 0) {
@@ -200,11 +233,11 @@ function renderPattern() {
     { num: resolved.length, name: "checked" },
   ];
 
-  const segments = bandSegments(data.worries);
+  const segments = bandSegments(worries);
   const colors = { didntHappen: "var(--sage)", partly: "var(--partly)", happened: "var(--clay)" };
   let bandHTML = "";
   if (segments.length > 0) {
-    const tally = outcomeTally(data.worries);
+    const tally = outcomeTally(worries);
     let x = 0;
     const rects = segments.map((s) => {
       const width = s.fraction * 100;
@@ -228,6 +261,7 @@ function renderPattern() {
   }
 
   el.innerHTML = `
+    ${filterRowHTML()}
     <div class="headline-card card">${headlineHTML}</div>
     <div class="stat-tiles">
       ${tiles.map((t) => `<div class="stat-tile card"><span class="stat-num">${t.num}</span><span class="stat-name">${t.name}</span></div>`).join("")}
@@ -237,13 +271,17 @@ function renderPattern() {
 
 function renderHistory() {
   const el = $("#history-content");
-  const { resolved } = groupWorries(data.worries);
+  const { resolved } = groupWorries(filteredWorries());
   if (resolved.length === 0) {
-    el.innerHTML = `<p class="quiet-note">Checked worries will rest here. None yet.</p>`;
+    const note = categoryFilter
+      ? `No checked worries under &ldquo;${esc(categoryFilter)}&rdquo; yet.`
+      : "Checked worries will rest here. None yet.";
+    el.innerHTML = `${filterRowHTML()}<p class="quiet-note">${note}</p>`;
     return;
   }
   const today = todayStr();
   el.innerHTML = `
+    ${filterRowHTML()}
     <h2 class="section-h">Checked worries</h2>
     <div class="worry-list">
       ${resolved.map((w) => {
