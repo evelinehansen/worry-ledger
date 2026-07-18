@@ -18,14 +18,14 @@
         <div class="backup-cluster">
           <span class="backup-status" id="backup-status">Last backup: never</span>
           <button class="btn" id="export-btn">Export</button>
-          <button class="btn ghost" id="import-btn">Import</button>
+          <button class="btn" id="import-btn">Import</button>
         </div>
       </div>
-      <nav class="tabs" aria-label="Views">
-        <button class="tab is-active" data-view="today" aria-current="page">Today<span class="tab-badge" id="today-badge" hidden></span></button>
-        <button class="tab" data-view="pattern">Pattern</button>
-        <button class="tab" data-view="lot">Parking lot</button>
-        <button class="tab" data-view="history">History</button>
+      <nav class="tabs" aria-label="Views" role="tablist">
+        <button class="tab" role="tab" data-view="today" aria-selected="true">Today<span class="tab-badge" id="today-badge" hidden></span></button>
+        <button class="tab" role="tab" data-view="pattern" aria-selected="false">Pattern</button>
+        <button class="tab" role="tab" data-view="lot" aria-selected="false">Parking lot</button>
+        <button class="tab" role="tab" data-view="history" aria-selected="false">History</button>
       </nav>
     </div>
   </header>
@@ -84,7 +84,7 @@
         <span class="field-label" id="checkin-legend">When will you know?</span>
         <div class="preset-row" role="group" aria-labelledby="checkin-legend">
           <button type="button" class="chip" data-preset="tomorrow">Tomorrow</button>
-          <button type="button" class="chip is-active" data-preset="week" aria-pressed="true">Next week</button>
+          <button type="button" class="chip selected" data-preset="week" aria-pressed="true">Next week</button>
           <button type="button" class="chip" data-preset="month">In a month</button>
           <button type="button" class="chip" data-preset="custom">Pick a date</button>
         </div>

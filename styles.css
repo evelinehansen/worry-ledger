@@ -140,7 +140,7 @@ body {
   transition: color 0.2s, border-color 0.2s;
 }
 .tab:hover { color: var(--ink); }
-.tab.is-active { color: var(--ink); border-bottom-color: var(--sage); }
+.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--sage); }
 
 .tab-badge {
   background: var(--sage);
@@ -610,7 +610,7 @@ input[type="range"] {
   transition: background 0.2s, border-color 0.2s, color 0.2s;
 }
 .chip:hover { border-color: var(--ink-faint); }
-.chip.is-active {
+.chip.selected {
   background: var(--sage-tint);
   border-color: var(--sage);
   color: var(--sage-deep);

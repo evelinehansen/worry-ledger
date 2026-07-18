@@ -45,10 +45,7 @@ function toast(message) {
 function switchView(view) {
   currentView = view;
   document.querySelectorAll(".tab").forEach((tab) => {
-    const active = tab.dataset.view === view;
-    tab.classList.toggle("is-active", active);
-    if (active) tab.setAttribute("aria-current", "page");
-    else tab.removeAttribute("aria-current");
+    tab.setAttribute("aria-selected", String(tab.dataset.view === view));
   });
   $("#view-today").hidden = view !== "today";
   $("#view-pattern").hidden = view !== "pattern";
@@ -87,7 +84,7 @@ function filterRowHTML() {
   if (categoryFilter && !cats.includes(categoryFilter)) categoryFilter = null;
   const chip = (value, label) => {
     const active = value === categoryFilter;
-    return `<button type="button" class="chip filter-chip ${active ? "is-active" : ""}"
+    return `<button type="button" class="chip filter-chip ${active ? "selected" : ""}"
       data-filter="${esc(value ?? "")}" aria-pressed="${active}">${esc(label)}</button>`;
   };
   return `
@@ -360,7 +357,7 @@ function openCapture() {
   capturePreset = "week";
   document.querySelectorAll(".preset-row .chip").forEach((c) => {
     const active = c.dataset.preset === "week";
-    c.classList.toggle("is-active", active);
+    c.classList.toggle("selected", active);
     c.setAttribute("aria-pressed", String(active));
   });
   $("#checkin-date").hidden = true;
@@ -381,7 +378,7 @@ document.querySelectorAll(".preset-row .chip").forEach((chip) => {
     capturePreset = chip.dataset.preset;
     document.querySelectorAll(".preset-row .chip").forEach((c) => {
       const active = c === chip;
-      c.classList.toggle("is-active", active);
+      c.classList.toggle("selected", active);
       c.setAttribute("aria-pressed", String(active));
     });
     const dateInput = $("#checkin-date");
@@ -449,7 +446,7 @@ function openCheckin(worry) {
   if (worry.notes) meta += ` Your note: "${worry.notes}"`;
   $("#checkin-worry-meta").textContent = meta;
   document.querySelectorAll(".outcome-btn").forEach((b) => b.classList.remove("is-active"));
-  document.querySelectorAll("#severity-row .chip").forEach((c) => c.classList.remove("is-active"));
+  document.querySelectorAll("#severity-row .chip").forEach((c) => c.classList.remove("selected"));
   $("#severity-block").hidden = true;
   $("#severity-label").textContent = "";
   $("#reflection-block").hidden = true;
@@ -466,7 +463,7 @@ document.querySelectorAll(".outcome-btn").forEach((btn) => {
     $("#severity-block").hidden = !asksSeverity;
     if (!asksSeverity) {
       checkinSeverity = null;
-      document.querySelectorAll("#severity-row .chip").forEach((c) => c.classList.remove("is-active"));
+      document.querySelectorAll("#severity-row .chip").forEach((c) => c.classList.remove("selected"));
       $("#severity-label").textContent = "";
     }
     $("#reflection-block").hidden = false;
@@ -477,7 +474,7 @@ document.querySelectorAll("#severity-row .chip").forEach((chip) => {
   chip.addEventListener("click", () => {
     checkinSeverity = Number(chip.dataset.severity);
     document.querySelectorAll("#severity-row .chip").forEach((c) =>
-      c.classList.toggle("is-active", c === chip));
+      c.classList.toggle("selected", c === chip));
     $("#severity-label").textContent = `${checkinSeverity} of 5, ${SEVERITY_WORDS[checkinSeverity]}`;
   });
 });
