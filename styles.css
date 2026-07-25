@@ -23,6 +23,12 @@
 
   --line: #E7E5DA;
   --track: #EDECE2;
+  --scrim: rgba(38, 42, 33, 0.35);
+
+  /* the shared content frame: same width on every tool in the family */
+  --page-max: 880px;
+  --page-pad: 24px;
+  --measure: 62ch;   /* line length for long running text only, never the frame */
 
   --radius: 16px;
   --shadow: 0 10px 30px rgba(44, 48, 36, 0.08);
@@ -55,13 +61,13 @@ body {
   z-index: 20;
   background: rgba(250, 250, 247, 0.92);
   backdrop-filter: blur(8px);
-  border-bottom: 1px solid var(--line);
+  /* no border here: the divider belongs to the tab row, inside the frame */
 }
 
 .app-header-inner {
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 0.9rem 1rem 0;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding: 0.9rem var(--page-pad) 0;
 }
 
 .header-row {
@@ -80,29 +86,30 @@ body {
 }
 .app-title-accent { color: var(--sage); }
 
-.backup-cluster {
+/* status + both pills on ONE line, status first */
+.header-right {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .backup-status {
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   color: var(--ink-soft);
-  margin-right: 0.35rem;
 }
 .backup-status.stale { color: var(--clay-deep); }
 
 .app-main {
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 1.5rem 1rem 3rem;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding: 1.5rem var(--page-pad) 3rem;
 }
 
 .app-footer {
-  max-width: 860px;
-  margin: 0 auto;
-  padding: 0 1rem 5.5rem;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding: 0 var(--page-pad) 5.5rem;
   color: var(--ink-soft);
 }
 
@@ -110,50 +117,53 @@ body {
   font-size: 0.82rem;
   color: var(--ink-soft);
   text-align: center;
-  margin-top: 0.5rem;
+  max-width: var(--measure);
+  margin: 0.5rem auto 0;
 }
 
 /* ---- tabs -------------------------------------------------------------- */
 
+/* The tab row carries the section divider itself, so the line stops at the
+   frame instead of running the full width of the window. */
 .tabs {
   display: flex;
-  gap: 0.25rem;
+  align-items: center;
+  gap: 1.5rem;
   margin-top: 0.5rem;
+  border-bottom: 1px solid var(--line);
   overflow-x: auto;
 }
 
 .tab {
   font: inherit;
   font-size: 0.92rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--ink-soft);
   background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  padding: 0.55rem 0.9rem;
+  border: 0;
+  padding: 0.5rem 0;
   min-height: 44px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.45rem;
   white-space: nowrap;
-  transition: color 0.2s, border-color 0.2s;
+  transition: color 0.2s, box-shadow 0.2s;
 }
 .tab:hover { color: var(--ink); }
-.tab[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--sage); }
+.tab[aria-selected="true"] {
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--sage);
+}
 
 .tab-badge {
   background: var(--sage);
   color: #FFFFFF;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   border-radius: 999px;
-  min-width: 20px;
-  height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 6px;
+  padding: 0.1rem 0.45rem;
+  margin-left: 0.4rem;
 }
 
 /* ---- buttons ------------------------------------------------------------ */
@@ -268,6 +278,7 @@ body {
   font-weight: 600;
   font-size: 1.02rem;
   padding-right: 2rem;
+  max-width: var(--measure);
 }
 
 /* Dread shows as a quiet size and tint difference, never a badge. */
@@ -280,6 +291,7 @@ body {
   font-size: 0.85rem;
   color: var(--ink-soft);
   padding-right: 2rem;
+  max-width: var(--measure);
 }
 
 .worry-meta {
@@ -505,7 +517,7 @@ body {
   position: fixed;
   inset: 0;
   z-index: 40;
-  background: rgba(38, 42, 33, 0.35);
+  background: var(--scrim);
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -722,10 +734,14 @@ input[type="range"] {
 }
 
 @media (max-width: 719px) {
+  :root { --page-pad: 16px; }
   .app-title { font-size: 1.25rem; }
+  /* the whole cluster drops as one unit, status still first and inline */
+  .header-right { width: 100%; justify-content: flex-start; }
   .backup-status { font-size: 0.8rem; }
-  .backup-cluster .btn { padding: 0.4rem 0.8rem; min-height: 40px; }
-  .tab { padding: 0.55rem 0.6rem; font-size: 0.88rem; }
+  .header-right .btn { padding: 0.4rem 0.8rem; min-height: 40px; }
+  .tabs { gap: 1.15rem; }
+  .tab { font-size: 0.88rem; }
 }
 
 /* ---- reduced motion ---------------------------------------------------------- */
